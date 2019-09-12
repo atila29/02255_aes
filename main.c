@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 unsigned char S[] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -60,6 +61,43 @@ unsigned char* sub_bytes(unsigned char* input) {
    }
    return output;
 }
+
+int hex2int(char ch)
+{
+    if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    if (ch >= 'A' && ch <= 'F')
+        return ch - 'A' + 10;
+    if (ch >= 'a' && ch <= 'f')
+        return ch - 'a' + 10;
+    return -1;
+}
+
+unsigned char*  Subbytes(unsigned char* input){
+    int i;
+    int size = strlen(input);
+    char buffer[50];
+    char result[50];
+    printf("Initial String:\n");
+
+    for(i = 0; i < size; i=i+2)
+    {
+        printf("%c%c ", input[i],input[i+1]);
+    }
+    printf("\n\nAfter subbytes:\n");
+    for(i = 0; i < size; i=i+2)
+    {
+        int index = hex2int(input[i])*16+hex2int(input[i+1]);
+
+
+        sprintf(buffer,"%02hhX ", S[index]);
+        strcat(result, buffer);
+    }
+    return result;
+}
+
+
+
 
 unsigned char* multiply_by_2_arr(unsigned char* input){
     unsigned char output[16];
