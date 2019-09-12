@@ -83,10 +83,8 @@ unsigned char multiply_by_2(unsigned char input){
 
 unsigned char multiply_by_3(unsigned char input){
     unsigned char output;
-    output = input << 1;
-    if(input / (2 ^ 8) ){
-        output = output ^ 0x1B;
-    }
+    output = multiply_by_2(input);
+    output = output ^ input;
     return output;
 }
 
