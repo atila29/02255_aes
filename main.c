@@ -170,6 +170,7 @@ unsigned char* shift_rows(unsigned char* state){
 
 unsigned char* key_expansion(char key[]){
     unsigned char keys[4][4];
+    unsigned char keysShifted[4][4];
     unsigned char * result;
     //unsigned char* k1;
     //unsigned char* k2;
@@ -180,6 +181,24 @@ unsigned char* key_expansion(char key[]){
             keys[i][j] = key[i*4+j];
         }
     }
+    for(int i = 0; i<4; i++){
+        keysShifted[0][i] = keys[1][i];
+        keysShifted[1][i] = keys[2][i];
+        keysShifted[2][i] = keys[3][i];
+        keysShifted[3][i] = keys[0][i];
+    }
+
+    char keysConcat[16];
+    for(int i = 0; i<4; i++){
+        for(int j = 0; j < 4; j++){
+            keysConcat[4*i+j] = keysShifted[i][j];
+        }
+    }
+
+    result = Subbytes(keysConcat);
+
+
+
     return result;
 }
 
