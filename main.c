@@ -126,7 +126,7 @@ unsigned char multiply_by_3(unsigned char input){
     return output;
 }
 
-int mix_columns(unsigned char* a){
+unsigned char* mix_columns(unsigned char* a){
     unsigned char output[16];
     for(int i = 0; i < 4; i++){
         output[0 + i] = multiply_by_2(a[0+i])^multiply_by_3(a[4+i])^a[8+i]^a[12+i];
@@ -137,8 +137,64 @@ int mix_columns(unsigned char* a){
     return output;
 }
 
+unsigned char* add_round_key(unsigned char* key, unsigned char* state){
+    unsigned char result[16];
+    for(int i = 0; i < 16; i++){
+        result[i] = key[i]^state[i];
+    }
+}
+
+unsigned char* shift_rows(unsigned char* state){
+    unsigned char result[16];
+    result[0] = state[0];
+    result[1] = state[1];
+    result[2] = state[2];
+    result[3] = state[3];
+
+    result[4] = state[5];
+    result[5] = state[6];
+    result[6] = state[7];
+    result[7] = state[4];
+
+    result[8] = state[10];
+    result[9] = state[11];
+    result[10] = state[8];
+    result[11] = state[9];
+
+    result[12] = state[15];
+    result[13] = state[12];
+    result[14] = state[13];
+    result[15] = state[14];
+    return result;
+}
+
+unsigned char* key_expansion(char key[]){
+    unsigned char keys[4][4];
+    unsigned char * result;
+    //unsigned char* k1;
+    //unsigned char* k2;
+    //unsigned char* k3;
+
+    for(int i = 0; i<4; i++){
+        for(int j = 0; j < 4; j++){
+            keys[i][j] = key[i*4+j];
+        }
+    }
+    return result;
+}
+
+
 int main()
 {
-    printf("Hello world!\n");
+    char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+
+
+    key_expansion(key);
+    //char* state = add_round_key(key,plaintext);
+
+
+
+
     return 0;
 }
