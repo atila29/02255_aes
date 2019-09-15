@@ -98,7 +98,7 @@ unsigned char*  Subbytes(unsigned char* input){
 
 
 
-
+//not necessary
 unsigned char* multiply_by_2_arr(unsigned char* input){
     unsigned char output[16];
     for(int i = 0; i < 16; i++){
@@ -110,6 +110,7 @@ unsigned char* multiply_by_2_arr(unsigned char* input){
     return output;
 }
 
+//seems correct
 unsigned char multiply_by_2(unsigned char input){
     unsigned char output;
     output = input << 1;
@@ -119,6 +120,7 @@ unsigned char multiply_by_2(unsigned char input){
     return output;
 }
 
+//seems correct
 unsigned char multiply_by_3(unsigned char input){
     unsigned char output;
     output = multiply_by_2(input);
@@ -142,6 +144,7 @@ unsigned char* add_round_key(unsigned char* key, unsigned char* state){
     for(int i = 0; i < 16; i++){
         result[i] = key[i]^state[i];
     }
+    return result;
 }
 
 unsigned char* shift_rows(unsigned char* state){
@@ -202,6 +205,21 @@ unsigned char* key_expansion(char key[]){
     return result;
 }
 
+unsigned char* aes(char* key, char* text){
+    unsigned char* state = text;
+    unsigned char* keys[6] = key_expansion(key);
+    state = add_round_key(keys[0], state);
+    for(int i=0; i<4; i++){
+        state = sub_bytes(state);
+        state = shift_rows(state);
+        state = mix_columns(state);
+        state = add_round_key(keys[i+1], state);
+    }
+    state = sub_bytes(state);
+    state = shift_rows(state);
+    state = add_round_key(state);
+    return state;
+}
 
 int main()
 {
