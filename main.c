@@ -207,7 +207,8 @@ unsigned char* key_expansion(char key[]){
 
 unsigned char* aes(char* key, char* text){
     unsigned char* state = text;
-    unsigned char* keys[6] = key_expansion(key);
+    unsigned char *keys;
+    keys = key_expansion(key);
     state = add_round_key(keys[0], state);
     for(int i=0; i<4; i++){
         state = sub_bytes(state);
@@ -217,7 +218,7 @@ unsigned char* aes(char* key, char* text){
     }
     state = sub_bytes(state);
     state = shift_rows(state);
-    state = add_round_key(state);
+    state = add_round_key(keys[5], state);
     return state;
 }
 
