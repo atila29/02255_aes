@@ -54,14 +54,6 @@ unsigned int MI[] = {
     0x0B, 0x0D, 0x09, 0x0E
 };
 
-unsigned char* sub_bytes(unsigned char* input) {
-   unsigned char output[16];
-   for(int i = 0; i < 16; i++){
-        output[i] = S[input[i]];
-   }
-   return output;
-}
-
 int hex2int(char ch)
 {
     if (ch >= '0' && ch <= '9')
@@ -72,30 +64,6 @@ int hex2int(char ch)
         return ch - 'a' + 10;
     return -1;
 }
-
-unsigned char*  Subbytes(unsigned char* input){
-    int i;
-    int size = strlen(input);
-    char buffer[50];
-    char result[50];
-    printf("Initial String:\n");
-
-    for(i = 0; i < size; i=i+2)
-    {
-        printf("%c%c ", input[i],input[i+1]);
-    }
-    printf("\n\nAfter subbytes:\n");
-    for(i = 0; i < size; i=i+2)
-    {
-        int index = hex2int(input[i])*16+hex2int(input[i+1]);
-
-
-        sprintf(buffer,"%02hhX ", S[index]);
-        strcat(result, buffer);
-    }
-    return result;
-}
-
 
 
 //not necessary
@@ -126,6 +94,29 @@ unsigned char multiply_by_3(unsigned char input){
     output = multiply_by_2(input);
     output = output ^ input;
     return output;
+}
+
+unsigned char* sub_bytes(unsigned char* input) {
+    int i;
+    int size = strlen(input);
+    char buffer[50];
+    char result[50];
+    printf("Initial String:\n");
+
+    for(i = 0; i < size; i=i+2)
+    {
+        printf("%c%c ", input[i],input[i+1]);
+    }
+    printf("\n\nAfter subbytes:\n");
+    for(i = 0; i < size; i=i+2)
+    {
+        int index = hex2int(input[i])*16+hex2int(input[i+1]);
+
+
+        sprintf(buffer,"%02hhX ", S[index]);
+        strcat(result, buffer);
+    }
+    return result;
 }
 
 unsigned char* mix_columns(unsigned char* a){
@@ -198,7 +189,7 @@ unsigned char* key_expansion(char key[]){
         }
     }
 
-    result = Subbytes(keysConcat);
+    result = sub_bytes(keysConcat);
 
 
 
@@ -254,8 +245,10 @@ int main()
     char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
 
 
-    key_expansion(key);
-    //char* state = add_round_key(key,plaintext);
+    sub_bytes(plaintext);
+
+    // key_expansion(key);
+    //c har* state = add_round_key(key,plaintext);
 
 
 
