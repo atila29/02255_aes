@@ -154,9 +154,12 @@ unsigned char* shift_rows(unsigned char* state){
 }
 
 unsigned char* key_expansion(char key[]){
+    unsigned char roundConstant[] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36,0x6C,0xD8,0xAB,0x4D,0x9A,0x2F};
+
     unsigned char keys[4][4];
     unsigned char keysShifted[4][4];
-    unsigned char * result;
+    unsigned char * subBytesResult;
+    unsigned char * result = malloc(16);
     //unsigned char* k1;
     //unsigned char* k2;
     //unsigned char* k3;
@@ -180,7 +183,11 @@ unsigned char* key_expansion(char key[]){
         }
     }
 
-    result = sub_bytes(keysConcat);
+    subBytesResult = sub_bytes(keysConcat);
+
+    for(int i = 0; i<16; i++){
+         result[i] = subBytesResult[i]^roundConstant[i];
+    }
 
 
 
