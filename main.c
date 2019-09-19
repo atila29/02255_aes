@@ -6,6 +6,7 @@ void printHexArray(unsigned char* a){
     for(int i = 0; i < 16; i++){
         printf("%x ",a[i]);
     }
+    printf("\n");
 }
 
 unsigned char S[] = {
@@ -79,7 +80,6 @@ unsigned char* sub_bytes(unsigned char* input) {
    return output;
 }
 
-//seems correct
 unsigned char multiply_by_2(unsigned char input){
     unsigned char output;
     output = input << 1;
@@ -118,26 +118,27 @@ unsigned char* add_round_key(unsigned char* key, unsigned char* state){
 }
 
 unsigned char* shift_rows(unsigned char* state){
-    unsigned char result[16];
+    unsigned char* result = malloc(16);
+    //first row
     result[0] = state[0];
-    result[1] = state[1];
-    result[2] = state[2];
-    result[3] = state[3];
+    result[4] = state[4];
+    result[8] = state[8];
+    result[12] = state[12];
 
-    result[4] = state[5];
-    result[5] = state[6];
-    result[6] = state[7];
-    result[7] = state[4];
+    result[1] = state[5];
+    result[5] = state[9];
+    result[9] = state[13];
+    result[13] = state[1];
 
-    result[8] = state[10];
-    result[9] = state[11];
-    result[10] = state[8];
-    result[11] = state[9];
+    result[2] = state[10];
+    result[6] = state[14];
+    result[10] = state[2];
+    result[14] = state[6];
 
-    result[12] = state[15];
-    result[13] = state[12];
-    result[14] = state[13];
-    result[15] = state[14];
+    result[3] = state[15];
+    result[7] = state[3];
+    result[11] = state[7];
+    result[15] = state[11];
     return result;
 }
 
@@ -200,16 +201,16 @@ void test(){
    unsigned char state00[] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}; // <-- Plaintext
    unsigned char round_key0[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}; //
    unsigned char state01[] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0}; // <-- AddRoundKey()
-   unsigned char* lma = sub_bytes(&state01);
 
-   printHexArray(state01);
-   printf("\n");
-   printHexArray(lma);
-   free(lma);
 //Round 1:
 
    unsigned char state10[] = {0x63, 0xca, 0xb7, 0x04, 0x09, 0x53, 0xd0, 0x51, 0xcd, 0x60, 0xe0, 0xe7, 0xba, 0x70, 0xe1, 0x8c}; // <-- SubBytes()
+   unsigned char* lma = shift_rows(&state10);
+   printHexArray(lma);
+   printf("\n");
+   free(lma);
    unsigned char state11[] = {0x63, 0x53, 0xe0, 0x8c, 0x09, 0x60, 0xe1, 0x04, 0xcd, 0x70, 0xb7, 0x51, 0xba, 0xca, 0xd0, 0xe7}; // <-- ShiftRows()
+   printHexArray(state11);
    unsigned char state12[] = {0x5f, 0x72, 0x64, 0x15, 0x57, 0xf5, 0xbc, 0x92, 0xf7, 0xbe, 0x3b, 0x29, 0x1d, 0xb9, 0xf9, 0x1a}; // <-- MixColumns()
    unsigned char round_key1[] = {0xd6, 0xaa, 0x74, 0xfd, 0xd2, 0xaf, 0x72, 0xfa, 0xda, 0xa6, 0x78, 0xf1, 0xd6, 0xab, 0x76, 0xfe}; //
    unsigned char state13[] = {0x89, 0xd8, 0x10, 0xe8, 0x85, 0x5a, 0xce, 0x68, 0x2d, 0x18, 0x43, 0xd8, 0xcb, 0x12, 0x8f, 0xe4}; // <-- AddRoundKey()
