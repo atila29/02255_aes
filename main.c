@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+void printHexArray(unsigned char* a){
+    for(int i = 0; i < 16; i++){
+        printf("%x ",a[i]);
+    }
+}
+
 unsigned char S[] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -65,6 +71,13 @@ int hex2int(char ch)
     return -1;
 }
 
+unsigned char* sub_bytes(unsigned char* input) {
+   unsigned char* output = malloc(16);
+   for(int i = 0; i < 16; i++){
+        output[i] = S[input[i]];
+   }
+   return output;
+}
 
 //not necessary
 unsigned char* multiply_by_2_arr(unsigned char* input){
@@ -96,28 +109,6 @@ unsigned char multiply_by_3(unsigned char input){
     return output;
 }
 
-unsigned char* sub_bytes(unsigned char* input) {
-    int i;
-    int size = strlen(input);
-    char buffer[50];
-    char result[50];
-    printf("Initial String:\n");
-
-    for(i = 0; i < size; i=i+2)
-    {
-        printf("%c%c ", input[i],input[i+1]);
-    }
-    printf("\n\nAfter subbytes:\n");
-    for(i = 0; i < size; i=i+2)
-    {
-        int index = hex2int(input[i])*16+hex2int(input[i+1]);
-
-
-        sprintf(buffer,"%02hhX ", S[index]);
-        strcat(result, buffer);
-    }
-    return result;
-}
 
 unsigned char* mix_columns(unsigned char* a){
     unsigned char output[16];
@@ -131,7 +122,7 @@ unsigned char* mix_columns(unsigned char* a){
 }
 
 unsigned char* add_round_key(unsigned char* key, unsigned char* state){
-    unsigned char result[16];
+    unsigned char* result = malloc(16);
     for(int i = 0; i < 16; i++){
         result[i] = key[i]^state[i];
     }
@@ -221,7 +212,12 @@ void test(){
    unsigned char state00[] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}; // <-- Plaintext
    unsigned char round_key0[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}; //
    unsigned char state01[] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0}; // <-- AddRoundKey()
+   unsigned char* lma = sub_bytes(&state01);
+
    printHexArray(state01);
+   printf("\n");
+   printHexArray(lma);
+   free(lma);
 //Round 1:
 
    unsigned char state10[] = {0x63, 0xca, 0xb7, 0x04, 0x09, 0x53, 0xd0, 0x51, 0xcd, 0x60, 0xe0, 0xe7, 0xba, 0x70, 0xe1, 0x8c}; // <-- SubBytes()
@@ -238,11 +234,7 @@ void test(){
    unsigned char state23[] = {0x49, 0x15, 0x59, 0x8f, 0x55, 0xe5, 0xd7, 0xa0, 0xda, 0xca, 0x94, 0xfa, 0x1f, 0x0a, 0x63, 0xf7}; // <-- AddRoundKey()
 }
 
-void printHexArray(unsigned char* a){
-    for(int i = 0; i < 16; i++){
-        printf("%x ",a[i]);
-    }
-}
+
 
 int main()
 {
