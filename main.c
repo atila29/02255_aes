@@ -79,18 +79,6 @@ unsigned char* sub_bytes(unsigned char* input) {
    return output;
 }
 
-//not necessary
-unsigned char* multiply_by_2_arr(unsigned char* input){
-    unsigned char output[16];
-    for(int i = 0; i < 16; i++){
-        output[i] = input[i] << 1;
-        if(input[i] / (2 ^ 8) ){
-            output[i] = output[i] ^ 0x1B;
-        }
-    }
-    return output;
-}
-
 //seems correct
 unsigned char multiply_by_2(unsigned char input){
     unsigned char output;
