@@ -80,11 +80,13 @@ unsigned char* sub_bytes(unsigned char* input) {
    return output;
 }
 
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+
 unsigned char multiply_by_2(unsigned char input){
     unsigned char output;
     output = input << 1;
-    if(input / (2 ^ 8) ){
-        output = output ^ 0x1B;
+    if(CHECK_BIT(input, 7)){
+        output = output ^ 0x1b;
     }
     return output;
 }
@@ -202,7 +204,7 @@ unsigned char* aes(char* key, char* text){
     unsigned char *keys;
     keys = key_expansion(key);
     state = add_round_key(keys[0], state);
-    for(int i=0; i<4; i++){
+    for(int i=0; i<3; i++){
         state = sub_bytes(state);
         state = shift_rows(state);
         state = mix_columns(state);
@@ -210,7 +212,7 @@ unsigned char* aes(char* key, char* text){
     }
     state = sub_bytes(state);
     state = shift_rows(state);
-    state = add_round_key(keys[5], state);
+    state = add_round_key(keys[4], state);
     return state;
 }
 
