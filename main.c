@@ -199,27 +199,27 @@ unsigned char * key_expansion(unsigned char *input) {
     return output;
 }
 
-unsigned char* aes(char* key, char* state){
+unsigned char* aes(unsigned char* key,unsigned  char* state){
     unsigned char* keys;
-    keys = key_expansion(&key);
+    keys = key_expansion(key);
     printHexArray(state);
-    state = add_round_key(&keys[0], &state);
+    state = add_round_key(keys, state);
     printHexArray(state);
     for(int i=0; i<3; i++){
-        state = sub_bytes(&state);
+        state = sub_bytes(state);
         printHexArray(state);
-        state = shift_rows(&state);
+        state = shift_rows(state);
         printHexArray(state);
-        state = mix_columns(&state);
+        state = mix_columns(state);
         printHexArray(state);
-        state = add_round_key(&keys[i+1],  &state);
+        state = add_round_key(&keys[i+1],  state);
         printHexArray(state);
     }
-    state = sub_bytes(&state);
+    state = sub_bytes(state);
     printHexArray(state);
-    state = shift_rows(&state);
+    state = shift_rows(state);
     printHexArray(state);
-    state = add_round_key(&keys[4], &state);
+    state = add_round_key(&keys[4], state);
     printHexArray(state);
     return state;
 }
@@ -236,7 +236,7 @@ void test(){
 //Round 1:
 
    unsigned char state10[] = {0x63, 0xca, 0xb7, 0x04, 0x09, 0x53, 0xd0, 0x51, 0xcd, 0x60, 0xe0, 0xe7, 0xba, 0x70, 0xe1, 0x8c}; // <-- SubBytes()
-   unsigned char* lma = shift_rows(&state10);
+   unsigned char* lma = shift_rows(state10);
    printHexArray(lma);
    printf("\n");
    free(lma);
@@ -320,16 +320,16 @@ void key_expansion_test()
 
 int main()
 {
-    char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-    char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-    aes(&plaintext, &key);
+    unsigned char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    aes(key, plaintext);
 //    sub_bytes(plaintext);
 //    test();
     // key_expansion(key);
     //c har* state = add_round_key(key,plaintext);
 
 
-    key_expansion_test();
+    //key_expansion_test();
 
 
     return 0;
