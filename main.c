@@ -200,18 +200,27 @@ unsigned char * key_expansion(unsigned char *input) {
 }
 
 unsigned char* aes(char* key, char* state){
-    unsigned char* keys = malloc(176);
-    keys = &key_expansion(key);
-    state = add_round_key(keys[0], state);
+    unsigned char* keys;
+    keys = key_expansion(&key);
+    printHexArray(state);
+    state = add_round_key(&keys[0], &state);
+    printHexArray(state);
     for(int i=0; i<3; i++){
-        state = sub_bytes(state);
-        state = shift_rows(state);
-        state = mix_columns(state);
-        state = add_round_key(keys[i+1], state);
+        state = sub_bytes(&state);
+        printHexArray(state);
+        state = shift_rows(&state);
+        printHexArray(state);
+        state = mix_columns(&state);
+        printHexArray(state);
+        state = add_round_key(&keys[i+1],  &state);
+        printHexArray(state);
     }
-    state = sub_bytes(state);
-    state = shift_rows(state);
-    state = add_round_key(keys[4], state);
+    state = sub_bytes(&state);
+    printHexArray(state);
+    state = shift_rows(&state);
+    printHexArray(state);
+    state = add_round_key(&keys[4], &state);
+    printHexArray(state);
     return state;
 }
 
