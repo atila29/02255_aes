@@ -101,12 +101,12 @@ unsigned char multiply_by_3(unsigned char input){
 
 
 unsigned char* mix_columns(unsigned char* a){
-    unsigned char output[16];
+    unsigned char * output = malloc(16);
     for(int i = 0; i < 4; i++){
-        output[0 + i] = multiply_by_2(a[0+i])^multiply_by_3(a[4+i])^a[8+i]^a[12+i];
-        output[4 + i] = a[0+i]^multiply_by_2(a[4+i])^multiply_by_3(a[8+i])^a[12+i];
-        output[8 + i] = a[0+i]^a[4+i]^multiply_by_2(a[8+i])^multiply_by_3(a[12+i]);
-        output[12 + i] = multiply_by_3(a[0+i])^a[4+i]^a[8+i]^multiply_by_2(a[12+i]);
+        output[0 + 4 * i] = multiply_by_2(a[0 + 4 * i]) ^ multiply_by_3(a[1 + 4 * i])^ a[2 + 4 * i] ^ a[3 + 4 * i];
+        output[1 + 4 * i] = a[0 + 4 * i] ^ multiply_by_2(a[1 + 4 * i]) ^ multiply_by_3(a[2 + 4 * i]) ^ a[3 + 4 * i];
+        output[2 + 4 * i] = a[0 + 4 * i] ^ a[1 + 4 * i] ^ multiply_by_2(a[2 + 4 * i]) ^ multiply_by_3(a[3 + 4 * i]);
+        output[3 + 4 * i] = multiply_by_3(a[0 + 4 * i]) ^ a[1 + 4 * i] ^ a[2 + 4 * i] ^ multiply_by_2(a[3 + 4 * i]);
     }
     return output;
 }
@@ -199,10 +199,9 @@ unsigned char * key_expansion(unsigned char *input) {
     return output;
 }
 
-unsigned char* aes(char* key, char* text){
-    unsigned char* state = text;
-    unsigned char *keys;
-    keys = key_expansion(key);
+unsigned char* aes(char* key, char* state){
+    unsigned char* keys = malloc(176);
+    keys = &key_expansion(key);
     state = add_round_key(keys[0], state);
     for(int i=0; i<3; i++){
         state = sub_bytes(state);
@@ -314,7 +313,7 @@ int main()
 {
     char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
     char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-
+    aes(&plaintext, &key);
 //    sub_bytes(plaintext);
 //    test();
     // key_expansion(key);
