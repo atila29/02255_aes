@@ -111,7 +111,7 @@ unsigned char* mix_columns(unsigned char* a){
     return output;
 }
 
-unsigned char* add_round_key(unsigned char* key, unsigned char* state){
+unsigned char* add_round_key(const unsigned char* key, const unsigned char* state){
     unsigned char* result = malloc(16);
     for(int i = 0; i < 16; i++){
         result[i] = key[i]^state[i];
@@ -119,7 +119,7 @@ unsigned char* add_round_key(unsigned char* key, unsigned char* state){
     return result;
 }
 
-unsigned char* shift_rows(unsigned char* state){
+unsigned char* shift_rows(const unsigned char* state){
     unsigned char* result = malloc(16);
     //first row
     result[0] = state[0];
@@ -163,7 +163,7 @@ void schedule_core(unsigned char *in, unsigned char round) {
 
 }
 
-unsigned char * key_expansion(unsigned char *input) {
+unsigned char * key_expansion(const unsigned char *input) {
     unsigned char * output;
     output = malloc(176);
     unsigned char last_bytes[4];
