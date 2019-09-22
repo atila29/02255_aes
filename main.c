@@ -224,6 +224,36 @@ unsigned char* aes(unsigned char* key,unsigned  char* state){
     return state;
 }
 
+unsigned char** generate_plain_texts(){
+    unsigned char plain_texts[256][16];
+    for(int i = 0; i < 256; i++){
+        for(int j = 1; j < 16; j++){
+            plain_texts[i][0] = i;
+            plain_texts[i][j] = 1;
+        }
+    }
+    return plain_texts;
+}
+
+
+unsigned char* attack(){
+    //A chosen plain text attack.
+    //The attacker can choose plain texts and get the corresponding cipher texts.
+    //His job is to find the key.Choose 256 plain texts which have equal values in 15 bytes,
+    //but different values in one particular byte, say, the first byte. Get the 256 cipher texts
+
+    //(encrypted with a secret key usingAES reduced to 4 rounds).
+
+    //For each cipher text byte do:For each of the 256 values of the round key
+    //(in that byte position) compute backwards through AddRoundKey,ShiftRows and SubBytes for all cipher texts.
+    //Compute the (exclusive-or) sum of all these values. If this sumis zero, then the guessed value of the key is a potentialcandidate for the secret key (byte).
+    // If the sum is not zero,then the guessed value of the key is not the correct value.
+    // the attack using other sets of 256 plaintexts until onlyone value of the key bytes are left as candidate key bytes.Once you have identified all 16 bytes of the 4th round key,
+    //you can compute backwards through the key schedule to findthe user-selected key.
+    // (This last step may be skipped.)
+
+}
+
 void test(){
     unsigned char plaintext[] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
     unsigned char cipher_key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
@@ -240,7 +270,7 @@ void test(){
    unsigned char state11[] = {0x63, 0x53, 0xe0, 0x8c, 0x09, 0x60, 0xe1, 0x04, 0xcd, 0x70, 0xb7, 0x51, 0xba, 0xca, 0xd0, 0xe7}; // <-- ShiftRows()
 
    unsigned char state12[] = {0x5f, 0x72, 0x64, 0x15, 0x57, 0xf5, 0xbc, 0x92, 0xf7, 0xbe, 0x3b, 0x29, 0x1d, 0xb9, 0xf9, 0x1a}; // <-- MixColumns()
-   
+
    unsigned char round_key1[] = {0xd6, 0xaa, 0x74, 0xfd, 0xd2, 0xaf, 0x72, 0xfa, 0xda, 0xa6, 0x78, 0xf1, 0xd6, 0xab, 0x76, 0xfe}; //
    unsigned char state13[] = {0x89, 0xd8, 0x10, 0xe8, 0x85, 0x5a, 0xce, 0x68, 0x2d, 0x18, 0x43, 0xd8, 0xcb, 0x12, 0x8f, 0xe4}; // <-- AddRoundKey()
 
@@ -320,6 +350,7 @@ int main()
 {
     unsigned char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
     unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    attack();
     aes(key, plaintext);
 //    sub_bytes(plaintext);
 //    test();
