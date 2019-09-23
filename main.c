@@ -202,25 +202,25 @@ unsigned char * key_expansion(const unsigned char *input) {
 unsigned char* aes(unsigned char* key,unsigned  char* state){
     unsigned char* keys;
     keys = key_expansion(key);
-    printHexArray(state);
+//    printHexArray(state);
     state = add_round_key(keys, state);
-    printHexArray(state);
+//    printHexArray(state);
     for(int i=0; i<3; i++){
         state = sub_bytes(state);
-        printHexArray(state);
+//        printHexArray(state);
         state = shift_rows(state);
-        printHexArray(state);
+//        printHexArray(state);
         state = mix_columns(state);
-        printHexArray(state);
+//        printHexArray(state);
         state = add_round_key(keys + (16 * i) + 16,  state);
-        printHexArray(state);
+//        printHexArray(state);
     }
     state = sub_bytes(state);
-    printHexArray(state);
+//    printHexArray(state);
     state = shift_rows(state);
-    printHexArray(state);
+//    printHexArray(state);
     state = add_round_key(&keys[4], state);
-    printHexArray(state);
+//    printHexArray(state);
     return state;
 }
 
@@ -247,13 +247,43 @@ void generate_plain_texts1(size_t N, size_t M, unsigned char plain_texts[N][M]){
 
 
 unsigned char* attack(){
+    unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
     //A chosen plain text attack.
     //The attacker can choose plain texts and get the corresponding cipher texts.
     //His job is to find the key.Choose 256 plain texts which have equal values in 15 bytes,
     //but different values in one particular byte, say, the first byte. Get the 256 cipher texts
 
+    //GENERATES CHOSEN PLAINTEXT
+    const size_t N = 256;
+    const size_t M = 16;
+    unsigned char chosenPlainText[N][M];
+    generate_plain_texts1(N,M,chosenPlainText);
+
     //(encrypted with a secret key usingAES reduced to 4 rounds).
 
+    //ENCRYPTS CHOSEN PLAINTEXT AND STORES IT IN MATRIX
+    const size_t N_Encrypted = 256;
+    const size_t M_Encrypted = 16;
+    unsigned char EncryptedPlainText[N_Encrypted][M_Encrypted];
+    for(int i = 0; i < 256; i++) {
+        unsigned char tempInputPlaintext[16];
+        for (int j = 0; j < 16; j++) {
+            tempInputPlaintext[j] = chosenPlainText[i][j];
+        }
+        unsigned char* tempEncrypted = aes(key, tempInputPlaintext);
+        for(int k = 0; k < 16; k++){
+            EncryptedPlainText[i][k] = tempEncrypted[k];
+        }
+    }
+    printf("Encrypted: \n");
+    for(int i = 0; i < 20; i++) {
+        for (int j = 0; j < 16; j++) {
+            printf("%x ", EncryptedPlainText[i][j]);
+        }
+        printf("\n");
+    }
+
+    
     //For each cipher text byte do:For each of the 256 values of the round key
     //(in that byte position) compute backwards through AddRoundKey,ShiftRows and SubBytes for all cipher texts.
     //Compute the (exclusive-or) sum of all these values. If this sumis zero, then the guessed value of the key is a potentialcandidate for the secret key (byte).
@@ -361,24 +391,14 @@ int main()
     unsigned char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
     unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
     attack();
-    aes(key, plaintext);
+    //aes(key, plaintext);
 //    sub_bytes(plaintext);
 //    test();
     // key_expansion(key);
     //c har* state = add_round_key(key,plaintext);
 
 
-    const size_t N = 256;
-    const size_t M = 16;
-    unsigned char chosenPlainText[N][M];
-    printf("CHOSEN PLAINTEXT - First 20 lines:\n");
-    generate_plain_texts1(N,M,chosenPlainText);
-    for(int i = 0; i < 20; i++) {
-        for (int j = 0; j < 16; j++) {
-            printf("0x%x ", chosenPlainText[i][j]);
-        }
-        printf("\n");
-    }
+
 
     //key_expansion_test();
 
