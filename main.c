@@ -235,6 +235,16 @@ unsigned char** generate_plain_texts(){
     return plain_texts;
 }
 
+void generate_plain_texts1(size_t N, size_t M, unsigned char plain_texts[N][M]){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < M; j++){
+            plain_texts[i][0] = i;
+            plain_texts[i][j] = 1;
+        }
+    }
+}
+
+
 
 unsigned char* attack(){
     //A chosen plain text attack.
@@ -357,6 +367,18 @@ int main()
     // key_expansion(key);
     //c har* state = add_round_key(key,plaintext);
 
+
+    const size_t N = 256;
+    const size_t M = 16;
+    unsigned char chosenPlainText[N][M];
+    printf("CHOSEN PLAINTEXT - First 20 lines:\n");
+    generate_plain_texts1(N,M,chosenPlainText);
+    for(int i = 0; i < 20; i++) {
+        for (int j = 0; j < 16; j++) {
+            printf("0x%x ", chosenPlainText[i][j]);
+        }
+        printf("\n");
+    }
 
     //key_expansion_test();
 
