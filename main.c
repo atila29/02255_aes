@@ -224,16 +224,22 @@ unsigned char* aes(unsigned char* key,unsigned  char* state){
     return state;
 }
 
-void generate_plain_texts1(size_t N, size_t M, unsigned char plain_texts[N][M]){
+void generate_plain_texts1(size_t N, size_t M, unsigned char plain_texts[N][M], int index){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
-            plain_texts[i][0] = i;
             plain_texts[i][j] = 1;
+            plain_texts[i][index] = i;
         }
     }
 }
 
-
+int sum(unsigned char* array){
+    int sum = array[0];
+    for(int i = 1; i < 16; i++){
+        sum ^ array[i];
+    }
+    return sum;
+}
 
 unsigned char* attack(){
     unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
@@ -246,31 +252,48 @@ unsigned char* attack(){
     const size_t N = 256;
     const size_t M = 16;
     unsigned char chosenPlainText[N][M];
-    generate_plain_texts1(N,M,chosenPlainText);
 
     //(encrypted with a secret key usingAES reduced to 4 rounds).
 
     //ENCRYPTS CHOSEN PLAINTEXT AND STORES IT IN MATRIX
     const size_t N_Encrypted = 256;
     const size_t M_Encrypted = 16;
+    unsigned char candidates[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char EncryptedPlainText[N_Encrypted][M_Encrypted];
-    for(int i = 0; i < 256; i++) {
-        unsigned char tempInputPlaintext[16];
-        for (int j = 0; j < 16; j++) {
-            tempInputPlaintext[j] = chosenPlainText[i][j];
+    for(int z = 0; z < 16; z++){
+        generate_plain_texts1(N,M,chosenPlainText, z);
+        for(int i = 0; i < 256; i++) {
+            unsigned char tempInputPlaintext[16];
+            for (int j = 0; j < 16; j++) {
+                tempInputPlaintext[j] = chosenPlainText[i][j];
+            }
+            unsigned char* tempEncrypted = aes(key, tempInputPlaintext);
+            for(int k = 0; k < 16; k++){
+                EncryptedPlainText[i][k] = tempEncrypted[k];
+            }
         }
-        unsigned char* tempEncrypted = aes(key, tempInputPlaintext);
-        for(int k = 0; k < 16; k++){
-            EncryptedPlainText[i][k] = tempEncrypted[k];
+        const unsigned char* KEY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        for(int i = 0; i < 256; i++) {
+            EncryptedPlainText[i] = add_round_key(KEY, EncryptedPlainText + (16 * i));
+            EncryptedPlainText[i] = shift_rows(EncryptedPlainText + (16 * i));
+            EncryptedPlainText[i] = sub_bytes(EncryptedPlainText + (16 * i));
+        }
+
+        for(int i = 0; i < 256; i++){
+            if(!sum(EncryptedPlainText[i])){
+                candidates[z] = EncryptedPlainText[i];
+            }
         }
     }
     printf("Encrypted: \n");
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
             printf("%x ", EncryptedPlainText[i][j]);
         }
         printf("\n");
     }
+    printf("candidates");
+    printHexArray(&candidates);
 
 
     //For each cipher text byte do:For each of the 256 values of the round key
