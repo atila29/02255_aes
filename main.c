@@ -263,38 +263,45 @@ unsigned char* attack(){
 
     //In this 2 dimensional array key_candidates[x][y] == 1 means that in the position x in the key y is a candidate for the value of the byte.
     //key_candidates[x][y] == 0 if the value y is not a candidate in the byte-position x in the key.
-    int key_candidates[16][256];
+    int key_candidates[2][16][256];
     //Populate it with 0s
-    for(int i = 0; i < 16; i++){
-        for(int j = 0; j < 256; j++){
-            key_candidates[i][j] = 0;
-        }
-    }
-    for(int z = 0; z < 16; z++){
-        //for every possible value of the byte of the key (i is the possibly value of key's actual byte)
-        for(unsigned int i = 0; i < 256; i++) {
-            //j is the value of the variable in the plain_text array (We try all the possibilities)
+    for(int k = 0; k < 2; k++) {
+        for(int i = 0; i < 16; i++){
             for(int j = 0; j < 256; j++){
-                //Generate plain_text for the byte_position z in the key with the variable value j
-                generate_plain_text(plain_text, j, z, 1);
-                //Generate the cypher text for the plain_text
-                cipher_text = aes(key, plain_text);
-                //Apply inverse sub_bytes on the XOR of the corresponding cypher text value and i (as I mentioned i is the possible byte-value in the key)
-                //Store it
-                values_of_key_byte_tests[j] = sub_byte_inv(cipher_text[z] ^ i);
-            }
-            //Check the XOR sum of the values of different plaintexts, when it is 0 we change the corresponding value in key_candidates to 1
-            if(sum(values_of_key_byte_tests) == 0){
-                key_candidates[z][i] = 1;
+                key_candidates[k][i][j] = 0;
             }
         }
     }
 
+    for(int k = 0; k < 2; k++) {
+        for(int z = 0; z < 16; z++){
+            //for every possible value of the byte of the key (i is the possibly value of key's actual byte)
+            for(unsigned int i = 0; i < 256; i++) {
+                //j is the value of the variable in the plain_text array (We try all the possibilities)
+                for(int j = 0; j < 256; j++){
+                    //Generate plain_text for the byte_position z in the key with the variable value j
+                    generate_plain_text(plain_text, j, z, k);
+                    //Generate the cypher text for the plain_text
+                    cipher_text = aes(key, plain_text);
+                    //Apply inverse sub_bytes on the XOR of the corresponding cypher text value and i (as I mentioned i is the possible byte-value in the key)
+                    //Store it
+                    values_of_key_byte_tests[j] = sub_byte_inv(cipher_text[z] ^ i);
+                }
+                //Check the XOR sum of the values of different plaintexts, when it is 0 we change the corresponding value in key_candidates to 1
+                if(sum(values_of_key_byte_tests) == 0){
+                    key_candidates[k][z][i] = 1;
+                }
+            }
+        }
+    }
+
+
+
     //Print the values
     for(int i = 0; i < 16; i++){
         for(int j = 0; j < 256; j++){
-            if(key_candidates[i][j]){
-                printf("i=%d %x ",i, j);
+            if(key_candidates[0][i][j] && key_candidates[1][i][j]){
+                printf("%x ", j);
             }
         }
     }
