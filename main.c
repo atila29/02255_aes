@@ -247,7 +247,7 @@ unsigned char*  generate_plain_text(unsigned char* plain_text, int value, int in
 
 int sum(unsigned char* array){
     int sum = array[0];
-    for(int i = 1; i < 16; i++){
+    for(int i = 1; i < 256; i++){
         sum = sum ^ array[i];
     }
     return sum;
