@@ -242,6 +242,19 @@ int sum(unsigned char* array){
 }
 
 unsigned char* attack(){
+    //Generate plaintext with one byte variable and 15 bytes constant variable {0,255}
+
+    //Generate cipher text for the plaintext
+
+
+
+
+
+
+
+
+
+
     unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
     //A chosen plain text attack.
     //The attacker can choose plain texts and get the corresponding cipher texts.
@@ -274,9 +287,17 @@ unsigned char* attack(){
         }
         const unsigned char* KEY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         for(int i = 0; i < 256; i++) {
-            EncryptedPlainText[i] = add_round_key(KEY, EncryptedPlainText + (16 * i));
-            EncryptedPlainText[i] = shift_rows(EncryptedPlainText + (16 * i));
-            EncryptedPlainText[i] = sub_bytes(EncryptedPlainText + (16 * i));
+            for(int j = 0; j < 16; j++){
+                    EncryptedPlainText[i][j] = add_round_key(&KEY, &EncryptedPlainText[i])[j];
+            }
+            for(int j = 0; j < 16; j++){
+                    EncryptedPlainText[i][j] = shift_rows(&EncryptedPlainText[i])[j];
+            }
+            for(int j = 0; j < 16; j++){
+                    EncryptedPlainText[i][j] = sub_bytes(&EncryptedPlainText[i])[j];
+            }
+
+
         }
 
         for(int i = 0; i < 256; i++){
