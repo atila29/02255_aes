@@ -9,6 +9,13 @@ void printHexArray(unsigned char* a){
     printf("\n");
 }
 
+void print256HexArray(unsigned char* a){
+    for(int i = 0; i < 256; i++){
+        printf("%x ",a[i]);
+    }
+    printf("\n");
+}
+
 unsigned char S[] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -80,8 +87,6 @@ unsigned char* sub_bytes(unsigned char* input) {
    return output;
 }
 
-
-
 unsigned char sub_byte_inv(unsigned char input) {
    unsigned char output;
    output = SI[input];
@@ -129,7 +134,7 @@ unsigned char* add_round_key(const unsigned char* key, const unsigned char* stat
 
 unsigned char* shift_rows(const unsigned char* state){
     unsigned char* result = malloc(16);
-    //first row
+
     result[0] = state[0];
     result[4] = state[4];
     result[8] = state[8];
@@ -232,11 +237,12 @@ unsigned char* aes(unsigned char* key,unsigned  char* state){
     return state;
 }
 
-void generate_plain_texts1(unsigned char plain_texts[16], int value; int index){
+void generate_plain_text(unsigned char* plain_text, int value, int index, int const_value){
     for(int i = 0; i < 16; i++){
-        plain_texts[i] = 1;
+        plain_text[i] = const_value;
     }
-    plain_texts[index] = value;
+    plain_text[index] = value;
+    return plain_text;
 }
 
 int sum(unsigned char* array){
@@ -248,82 +254,57 @@ int sum(unsigned char* array){
 }
 
 unsigned char* attack(){
-    //Generate plaintext with one byte variable and 15 bytes constant variable {0,255}
-
-    //Generate cipher text for the plaintext
-
-
-
-
-
-
-
-
-
 
     unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-    //A chosen plain text attack.
-    //The attacker can choose plain texts and get the corresponding cipher texts.
-    //His job is to find the key.Choose 256 plain texts which have equal values in 15 bytes,
-    //but different values in one particular byte, say, the first byte. Get the 256 cipher texts
 
-    //GENERATES CHOSEN PLAINTEXT
-    const size_t N = 256;
-    const size_t M = 16;
-    unsigned char chosenPlainText[N][M];
+    unsigned char* cypher_text = malloc(16);
+    unsigned char* plain_text = malloc(16);
+    unsigned char* values_of_key_byte_tests = malloc(256);
 
-    //(encrypted with a secret key usingAES reduced to 4 rounds).
-
-    //ENCRYPTS CHOSEN PLAINTEXT AND STORES IT IN MATRIX
-    const size_t N_Encrypted = 256;
-    const size_t M_Encrypted = 16;
-    unsigned char candidates[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    unsigned char EncryptedPlainText[N_Encrypted][M_Encrypted];
+    //In this 2 dimensional array key_candidates[x][y] == 1 means that in the position x in the key y is a candidate for the value of the byte.
+    //key_candidates[x][y] == 0 if the value y is not a candidate in the byte-position x in the key.
+    int key_candidates[16][256];
+    //Populate it with 0s
+    for(int i = 0; i < 16; i++){
+        for(int j = 0; j < 256; j++){
+            key_candidates[i][j] = 0;
+        }
+    }
     for(int z = 0; z < 16; z++){
-        generate_plain_texts1(N,M,chosenPlainText, z);
+        //for every possible value of the byte of the key (i is the possibly value of key's actual byte)
         for(int i = 0; i < 256; i++) {
-            unsigned char tempInputPlaintext[16];
-            for (int j = 0; j < 16; j++) {
-                tempInputPlaintext[j] = chosenPlainText[i][j];
-            }
-            unsigned char* tempEncrypted = aes(key, tempInputPlaintext);
-            for(int k = 0; k < 16; k++){
-                EncryptedPlainText[i][k] = tempEncrypted[k];
-            }
-        }
-
-        //for every possible value of the byto of the key
-        unsigned char key_candidates[256];
-        for(int i = 0; i < 256; i++) {
-            generate_plain_texts1(16)
+            //j is the value of the variable in the plain_text array (We try all the possibilities)
             for(int j = 0; j < 256; j++){
-
+                //Generate plain_text for the byte_position z in the key with the variable value j
+                generate_plain_text(plain_text, j, z, 1);
+                //Generate the cypher text for the plain_text
+                cypher_text = aes(key, plain_text);
+                //Apply inverse sub_bytes on the XOR of the corresponding cypher text value and i (as I mentioned i is the possible byte-value in the key)
+                //Store it
+                values_of_key_byte_tests[j] = sub_byte_inv(cypher_text[z]^i);
             }
-        }
-
-        for(int i = 0; i < 256; i++){
-            if(!sum(EncryptedPlainText[i])){
-                candidates[z] = EncryptedPlainText[i];
+            //Check the XOR sum of the values of different plaintexts, when it is 0 we change the corresponding value in key_candidates to 1
+            if(sum(values_of_key_byte_tests) == 0){
+                key_candidates[z][i] = 1;
             }
         }
     }
-    printf("Encrypted: \n");
-    for(int i = 0; i < 16; i++) {
-        for (int j = 0; j < 16; j++) {
-            printf("%x ", EncryptedPlainText[i][j]);
+
+    //Print the values
+    for(int i = 0; i < 16; i++){
+        for(int j = 0; j < 256; j++){
+            if(key_candidates[i][j]){
+                printf("%x ", j);
+            }
         }
-        printf("\n");
     }
-    printf("candidates");
-    printHexArray(&candidates);
 
+    //To cover the scenario when there are more than one key candidates we need to generate another table for key candidates and call the generate_plain_text function
+    //with another const_value parameter and apply AND on each element of the two key candidates arrays (c[i][j] = a[i][j] && b[i][j])
 
-    //for each keyvalue, xor the first byte of the cypher text and then send it through the S^-1. After getting 256 values xor-sum it. If is equal to 0.
-    // The keyvalue tested is a candidates for the first position
-    // If we get more than one key candidate. Then encrypt the second index of the chosen text and compare it.
-
-
-
+    free(cypher_text);
+    free(plain_text);
+    free(values_of_key_byte_tests);
 }
 
 void test(){
@@ -356,31 +337,6 @@ void test(){
 
 void key_expansion_test()
 {
-//    K00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-//    K01: 62 63 63 63 62 63 63 63 62 63 63 63 62 63 63 63
-//    K02: 9b 98 98 c9 f9 fb fb aa 9b 98 98 c9 f9 fb fb aa
-//    K03: 90 97 34 50 69 6c cf fa f2 f4 57 33 0b 0f ac 99
-//    K04: ee 06 da 7b 87 6a 15 81 75 9e 42 b2 7e 91 ee 2b
-//    K05: 7f 2e 2b 88 f8 44 3e 09 8d da 7c bb f3 4b 92 90
-//    K06: ec 61 4b 85 14 25 75 8c 99 ff 09 37 6a b4 9b a7
-//    K07: 21 75 17 87 35 50 62 0b ac af 6b 3c c6 1b f0 9b
-//    K08: 0e f9 03 33 3b a9 61 38 97 06 0a 04 51 1d fa 9f
-//    K09: b1 d4 d8 e2 8a 7d b9 da 1d 7b b3 de 4c 66 49 41
-//    K10: b4 ef 5b cb 3e 92 e2 11 23 e9 51 cf 6f 8f 18 8e
-//
-//
-//    K00: 10 a5 88 69 d7 4b e5 a3 74 cf 86 7c fb 47 38 59
-//    K01: b1 a2 43 66 66 e9 a6 c5 12 26 20 b9 e9 61 18 e0
-//    K02: 5c 0f a2 78 3a e6 04 bd 28 c0 24 04 c1 a1 3c e4
-//    K03: 6a e4 cb 00 50 02 cf bd 78 c2 eb b9 b9 63 d7 5d
-//    K04: 99 ea 87 56 c9 e8 48 eb b1 2a a3 52 08 49 74 0f
-//    K05: b2 78 f1 66 7b 90 b9 8d ca ba 1a df c2 f3 6e d0
-//    K06: 9f e7 81 43 e4 77 38 ce 2e cd 22 11 ec 3e 4c c1
-//    K07: 6d ce f9 8d 89 b9 c1 43 a7 74 e3 52 4b 4a af 93
-//    K08: 3b b7 25 3e b2 0e e4 7d 15 7a 07 2f 5e 30 a8 bc
-//    K09: 24 75 40 66 96 7b a4 1b 83 01 a3 34 dd 31 0b 88
-//    K10: d5 5e 84 a7 43 25 20 bc c0 24 83 88 1d 15 88 00
-
     unsigned char K00[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     unsigned char K01[] = {0x62, 0x63, 0x63, 0x63, 0x62, 0x63, 0x63, 0x63, 0x62, 0x63, 0x63, 0x63, 0x62, 0x63, 0x63, 0x63};
     unsigned char K02[] = {0x9b, 0x98, 0x98, 0xc9, 0xf9, 0xfb, 0xfb, 0xaa, 0x9b, 0x98, 0x98, 0xc9, 0xf9, 0xfb, 0xfb, 0xaa};
@@ -406,15 +362,7 @@ void key_expansion_test()
     unsigned char K09snd[] = {0x24, 0x75, 0x40, 0x66, 0x96, 0x7b, 0xa4, 0x1b, 0x83, 0x01, 0xa3, 0x34, 0xdd, 0x31, 0x0b, 0x88};
     unsigned char K10snd[] = {0xd5, 0x5e, 0x84, 0xa7, 0x43, 0x25, 0x20, 0xbc, 0xc0, 0x24, 0x83, 0x88, 0x1d, 0x15, 0x88, 0x00};
 
-
     unsigned char * exp_key = key_expansion(K00);
-
-//    printHexArray(k[0]);
-    printHexArray(exp_key);
-    printHexArray(exp_key+16);
-    printHexArray(exp_key+32);
-    printHexArray(exp_key+160);
-
 
 }
 
@@ -423,17 +371,6 @@ int main()
     unsigned char plaintext[] = {0x00, 0x11,0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
     unsigned char key[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
     attack();
-    //aes(key, plaintext);
-//    sub_bytes(plaintext);
-//    test();
-    // key_expansion(key);
-    //c har* state = add_round_key(key,plaintext);
-
-
-
-
-    //key_expansion_test();
-
 
     return 0;
 }
