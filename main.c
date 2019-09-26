@@ -237,7 +237,7 @@ unsigned char* aes(unsigned char* key,unsigned  char* state){
     return state;
 }
 
-void generate_plain_text(unsigned char* plain_text, int value, int index, int const_value){
+unsigned char*  generate_plain_text(unsigned char* plain_text, int value, int index, int const_value){
     for(int i = 0; i < 16; i++){
         plain_text[i] = const_value;
     }
