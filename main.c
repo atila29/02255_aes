@@ -317,14 +317,12 @@ unsigned char* attack(){
     printHexArray(&candidates);
 
 
-    //For each cipher text byte do:For each of the 256 values of the round key
-    //(in that byte position) compute backwards through AddRoundKey,ShiftRows and SubBytes for all cipher texts.
-    //Compute the (exclusive-or) sum of all these values. If this sumis zero, then the guessed value of the key is a potentialcandidate for the secret key (byte).
-    // If the sum is not zero,then the guessed value of the key is not the correct value.
-    // the attack using other sets of 256 plaintexts until onlyone value of the key bytes are left as candidate key bytes.Once you have identified all 16 bytes of the 4th round key,
-    //you can compute backwards through the key schedule to findthe user-selected key.
-    // (This last step may be skipped.)
+    //for each keyvalue, xor the first byte of the cypher text and then send it through the S^-1. After getting 256 values xor-sum it. If is equal to 0.
+    // The keyvalue tested is a candidates for the first position
+    // If we get more than one key candidate. Then encrypt the second index of the chosen text and compare it.
 
+
+    
 }
 
 void test(){
