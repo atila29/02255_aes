@@ -80,6 +80,14 @@ unsigned char* sub_bytes(unsigned char* input) {
    return output;
 }
 
+
+
+unsigned char sub_byte_inv(unsigned char input) {
+   unsigned char output;
+   output = SI[input];
+   return output;
+}
+
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 unsigned char multiply_by_2(unsigned char input){
@@ -224,13 +232,11 @@ unsigned char* aes(unsigned char* key,unsigned  char* state){
     return state;
 }
 
-void generate_plain_texts1(size_t N, size_t M, unsigned char plain_texts[N][M], int index){
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < M; j++){
-            plain_texts[i][j] = 1;
-            plain_texts[i][index] = i;
-        }
+void generate_plain_texts1(unsigned char plain_texts[16], int value; int index){
+    for(int i = 0; i < 16; i++){
+        plain_texts[i] = 1;
     }
+    plain_texts[index] = value;
 }
 
 int sum(unsigned char* array){
@@ -285,19 +291,14 @@ unsigned char* attack(){
                 EncryptedPlainText[i][k] = tempEncrypted[k];
             }
         }
-        const unsigned char* KEY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+        //for every possible value of the byto of the key
+        unsigned char key_candidates[256];
         for(int i = 0; i < 256; i++) {
-            for(int j = 0; j < 16; j++){
-                    EncryptedPlainText[i][j] = add_round_key(&KEY, &EncryptedPlainText[i])[j];
-            }
-            for(int j = 0; j < 16; j++){
-                    EncryptedPlainText[i][j] = shift_rows(&EncryptedPlainText[i])[j];
-            }
-            for(int j = 0; j < 16; j++){
-                    EncryptedPlainText[i][j] = sub_bytes(&EncryptedPlainText[i])[j];
-            }
+            generate_plain_texts1(16)
+            for(int j = 0; j < 256; j++){
 
-
+            }
         }
 
         for(int i = 0; i < 256; i++){
@@ -322,7 +323,7 @@ unsigned char* attack(){
     // If we get more than one key candidate. Then encrypt the second index of the chosen text and compare it.
 
 
-    
+
 }
 
 void test(){
