@@ -374,7 +374,7 @@ int main()
 
     unsigned char * expanded_key = key_expansion(key);
     printf("\n");
-    printHexArray(expanded_key + 48);
+    printHexArray(expanded_key + 64);
 
 
     return 0;
